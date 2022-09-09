@@ -59,10 +59,10 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 # The secret MUST exists for the job to succeed
-#kind: Secret
-#apiVersion: v1
-#metadata:
-#  name: random-password
-#stringData:
-#  username: admin
+kind: Secret
+apiVersion: v1
+metadata:
+  name: random-password
+stringData:
+  username: admin
 

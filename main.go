@@ -179,6 +179,11 @@ func main() {
 		}
 
 		newSecret.Annotations[annotation] = time.Now().String()
+
+		if newSecret.StringData == nil {
+			newSecret.StringData = map[string]string{}
+		}
+
 		newSecret.StringData[key] = randomString
 
 		secretJson, err := secret.Marshal()

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -68,16 +67,6 @@ func GenerateRandomString(n int) (string, error) {
 	return string(ret), nil
 }
 
-// GenerateRandomStringURLSafe returns a URL-safe, base64 encoded
-// securely generated random string.
-// It will return an error if the system's secure random
-// number generator fails to function correctly, in which
-// case the caller should not continue.
-func GenerateRandomStringURLSafe(n int) (string, error) {
-	b, err := GenerateRandomBytes(n)
-	return base64.URLEncoding.EncodeToString(b), err
-}
-
 func main() {
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
@@ -108,12 +97,13 @@ func main() {
 	log.Printf("Namespace: '%s' Name: '%s' Key: %s", namespace, name, key)
 
 	failures := 0
+	waited := 0
 
 	annotation := "k8s-random-password-generation-time"
 
 	for {
-		if failures >= 4 {
-			log.Print("Unable to create/update secret")
+		if failures >= 5 {
+			log.Print("Unable to update secret")
 			os.Exit(1)
 		}
 
@@ -126,37 +116,15 @@ func main() {
 				continue
 			}
 
-			randomString, err := GenerateRandomStringURLSafe(31)
-			if err != nil {
-				log.Print(err)
-				failures = failures + 1
-				time.Sleep(time.Second * time.Duration(failures) * 2)
-				continue
+			if waited >= 30 {
+				log.Print("secret not found, exiting")
+				os.Exit(1)
 			}
 
-			secret = &v1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: namespace,
-					Name:      name,
-					Annotations: map[string]string{
-						annotation: time.Now().String(),
-					},
-				},
-				StringData: map[string]string{
-					key: randomString,
-				},
-			}
-
-			_, err = clientset.CoreV1().Secrets(namespace).Create(context.Background(), secret, metav1.CreateOptions{})
-			if err != nil {
-				log.Print(err)
-				failures = failures + 1
-				time.Sleep(time.Second * time.Duration(failures) * 2)
-				continue
-			}
-
-			log.Printf("Secret created")
-			break
+			log.Printf("secret not found, waiting")
+			time.Sleep(time.Second * 10)
+			waited = waited + 1
+			continue
 		}
 
 		newSecret := secret.DeepCopy()
@@ -171,7 +139,7 @@ func main() {
 			break
 		}
 
-		randomString, err := GenerateRandomStringURLSafe(31)
+		randomString, err := GenerateRandomString(31)
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1

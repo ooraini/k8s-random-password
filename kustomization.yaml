@@ -1,5 +1,14 @@
 resources:
-  - job.yaml
+  - https://raw.githubusercontent.com/ooraini/k8s-random-password/v0.1.0/job.yaml
 
-namespace: abc
 namePrefix: redis-
+
+patchesJson6902:
+  - target:
+      kind: Job
+      version: v1
+      name: random-password
+    patch: |-
+      - op: replace
+        path: /spec/template/metadata/annotations/secretKey
+        value: admin-password

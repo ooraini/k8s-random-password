@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: random-password
-          image: ghcr.io/ooraini/k8s-random-password:7a9fb6bab5e6f6a4e4cdbdc36c60cc838ef03901
+          image: ghcr.io/ooraini/k8s-random-password:v0.0.4
           env:
           - name: NAMESPACE
             valueFrom:

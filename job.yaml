@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: random-password
-          image: perl:5.34.0
+          image: ghcr.io/ooraini/k8s-random-password:7a9fb6bab5e6f6a4e4cdbdc36c60cc838ef03901
           env:
           - name: NAMESPACE
             valueFrom:
@@ -22,11 +22,11 @@ spec:
           - name: SECRET_NAME
             valueFrom:
               fieldRef:
-                fieldPath: metadata.name
+                fieldPath: metadata.labels['job-name']
           - name: SECRET_KEY
             valueFrom:
               fieldRef:
-                fieldPath: metadata.annotations.secretKey
+                fieldPath: metadata.annotations['secretKey']
       serviceAccountName: random-password
       restartPolicy: Never
 ---
@@ -57,4 +57,12 @@ roleRef:
   kind: Role
   name: random-password
   apiGroup: rbac.authorization.k8s.io
+---
+# The secret MUST exists for the job to succeed
+#kind: Secret
+#apiVersion: v1
+#metadata:
+#  name: random-password
+#stringData:
+#  username: admin
 

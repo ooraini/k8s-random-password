@@ -111,7 +111,7 @@ func main() {
 	annotation := "k8s-random-password-generation-time"
 
 	for {
-		if failures >= 3 {
+		if failures >= 4 {
 			log.Print("Unable to create/update secret")
 			os.Exit(1)
 		}
@@ -121,7 +121,7 @@ func main() {
 			if !errors.IsNotFound(err) {
 				log.Print(err)
 				failures = failures + 1
-				time.Sleep(time.Second * time.Duration(failures))
+				time.Sleep(time.Second * time.Duration(failures) * 2)
 				continue
 			}
 
@@ -129,7 +129,7 @@ func main() {
 			if err != nil {
 				log.Print(err)
 				failures = failures + 1
-				time.Sleep(time.Second * time.Duration(failures))
+				time.Sleep(time.Second * time.Duration(failures) * 2)
 				continue
 			}
 
@@ -150,7 +150,7 @@ func main() {
 			if err != nil {
 				log.Print(err)
 				failures = failures + 1
-				time.Sleep(time.Second * time.Duration(failures))
+				time.Sleep(time.Second * time.Duration(failures) * 2)
 				continue
 			}
 
@@ -160,20 +160,21 @@ func main() {
 
 		newSecret := secret.DeepCopy()
 
-		if newSecret.Annotations != nil {
-			_, exists := newSecret.Annotations[annotation]
-			if exists {
-				log.Printf("Secret contains annotation '%s', exiting", annotation)
-				break
-			}
+		if newSecret.Annotations == nil {
 			newSecret.Annotations = map[string]string{}
+		}
+
+		_, exists := newSecret.Annotations[annotation]
+		if exists {
+			log.Printf("Secret contains annotation '%s', exiting", annotation)
+			break
 		}
 
 		randomString, err := GenerateRandomStringURLSafe(31)
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
-			time.Sleep(time.Second * time.Duration(failures))
+			time.Sleep(time.Second * time.Duration(failures) * 2)
 			continue
 		}
 
@@ -184,7 +185,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
-			time.Sleep(time.Second * time.Duration(failures))
+			time.Sleep(time.Second * time.Duration(failures) * 2)
 			continue
 		}
 
@@ -192,7 +193,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
-			time.Sleep(time.Second * time.Duration(failures))
+			time.Sleep(time.Second * time.Duration(failures) * 2)
 			continue
 		}
 
@@ -200,7 +201,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
-			time.Sleep(time.Second * time.Duration(failures))
+			time.Sleep(time.Second * time.Duration(failures) * 2)
 			continue
 		}
 
@@ -208,7 +209,7 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
-			time.Sleep(time.Second * time.Duration(failures))
+			time.Sleep(time.Second * time.Duration(failures) * 2)
 			continue
 		}
 

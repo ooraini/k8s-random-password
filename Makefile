@@ -6,4 +6,4 @@ docker-build:
 
 .PHONY: docker-push
 docker-push:
-	docker push ${IMG}:$$(git rev-parse HEAD)
+	docker push ${IMG}:$$(git describe --tags --abbrev=0)

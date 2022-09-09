@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	v1 "k8s.io/api/core/v1"
@@ -186,7 +187,7 @@ func main() {
 
 		newSecret.StringData[key] = randomString
 
-		secretJson, err := secret.Marshal()
+		secretJson, err := json.Marshal(secret)
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1
@@ -194,7 +195,7 @@ func main() {
 			continue
 		}
 
-		newSecretJson, err := newSecret.Marshal()
+		newSecretJson, err := json.Marshal(newSecret)
 		if err != nil {
 			log.Print(err)
 			failures = failures + 1

@@ -1,0 +1,5 @@
+resources:
+  - job.yaml
+
+namespace: abc
+namePrefix: redis-

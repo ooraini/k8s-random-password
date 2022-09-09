@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: random-password
+spec:
+  parallelism: 1
+  backoffLimit: 5
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      annotations:
+        secretKey: password
+    spec:
+      containers:
+        - name: random-password
+          image: perl:5.34.0
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SECRET_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: SECRET_KEY
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations.secretKey
+      serviceAccountName: random-password
+      restartPolicy: Never
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: random-password
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: random-password
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "patch"]
+    resourceNames:
+      - random-password
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: random-password
+subjects:
+  - kind: ServiceAccount
+    name: random-password
+roleRef:
+  kind: Role
+  name: random-password
+  apiGroup: rbac.authorization.k8s.io
+
